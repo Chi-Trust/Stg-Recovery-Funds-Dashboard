@@ -57,11 +57,13 @@ librarian::shelf(
 options(scipen = 999)
 
 # Urban theme settings
-set_urbn_defaults(style = "print", base_size = 12)
+#set_urbn_defaults(style = "print", base_size = 12)
+set_urbn_defaults(style = "print")
 
 # Load Merriweather font
-uname <- "RPitingo"
+#uname <- "RPitingo"
 #uname <- "astern"
+uname <- Sys.getenv("USERNAME")
 
 pc_font_path <- paste0("C:/Users/", uname, "/AppData/Local/Microsoft/Windows/Fonts/")
 mac_font_path <- "~/Library/Fonts"

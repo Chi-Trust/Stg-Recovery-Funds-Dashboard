@@ -87,8 +87,8 @@ library(zip)
 library(leaflet)
 library(scales)
 
-#set_urbn_defaults(style = "print", base_size = 12)
-set_urbn_defaults(style = "print")
+set_urbn_defaults(style = "print", base_size = 12)
+#set_urbn_defaults(style = "print")
 
 # Load Merriweather font
 #uname <- "RPitingo"

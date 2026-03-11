@@ -58,7 +58,6 @@ options(scipen = 999)
 
 # Urban theme settings
 set_urbn_defaults(style = "print", base_size = 12)
-#set_urbn_defaults(style = "print")
 
 # Load Merriweather font
 #uname <- "RPitingo"
@@ -121,7 +120,7 @@ knitr::include_graphics(here::here("www", "images", "CCT_logo_centered_blue-new.
 
 ```{r, echo = FALSE}
 cur_date <- Sys.Date()
-latest_slfrf_year <- 2023
+latest_slfrf_year <- 2025
 latest_slfrf_qtr <- "Q3"
 ```
 
@@ -320,9 +319,14 @@ il_unexp <- data_exp %>%
   pull(total_allocation)
 il_unexp_b <- round(il_unexp / 1000000000, 2)
 
-pct_il_unexp_b <- il_unexp_b / il_state_allocation_b
-pct_chicago_unexp_b <- chicago_unexp_b / chicago_allocation_b
-pct_cook_county_unexp_b <- cook_county_unexp_b / cook_county_allocation_b
+# Helper to convert empty to zero
+empty_to_zero <- function(x) {
+  if (length(x) == 0) 0 else x
+}
+
+pct_il_unexp_b <- empty_to_zero(il_unexp_b) / il_state_allocation_b
+pct_chicago_unexp_b <- empty_to_zero(chicago_unexp_b) / chicago_allocation_b
+pct_cook_county_unexp_b <- empty_to_zero(cook_county_unexp_b) / cook_county_allocation_b
 ```
 
 ```{r}

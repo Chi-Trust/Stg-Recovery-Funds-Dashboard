@@ -34,10 +34,18 @@ knitr::include_graphics(here::here("www", "images", "CCT_logo_centered_blue-new.
 <br>
 
 ```{r, echo = FALSE}
-cur_date <- Sys.Date()
+update_date_utc <- Sys.Date()
+update_date <- sprintf(
+  "%s %d, %s",
+  format(update_date_utc, "%B"),
+  as.integer(format(update_date_utc, "%d")),
+  format(update_date_utc, "%Y")
+)
 ```
 
-<center>**Last Updated:** `r cur_date`</center>
+<center>**Last Updated:** `r update_date`</center>
+<br>
+<center>**These data are preliminary and subject to revision.**</center>
 
 <br>
 

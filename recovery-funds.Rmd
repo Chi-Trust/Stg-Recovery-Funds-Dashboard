@@ -60,8 +60,9 @@ options(scipen = 999)
 set_urbn_defaults(style = "print", base_size = 12)
 
 # Load Merriweather font
-uname <- "RPitingo"
+#uname <- "RPitingo"
 #uname <- "astern"
+uname <- Sys.getenv("USERNAME")
 
 pc_font_path <- paste0("C:/Users/", uname, "/AppData/Local/Microsoft/Windows/Fonts/")
 mac_font_path <- "~/Library/Fonts"
@@ -118,12 +119,21 @@ knitr::include_graphics(here::here("www", "images", "CCT_logo_centered_blue-new.
 <br>
 
 ```{r, echo = FALSE}
-cur_date <- Sys.Date()
-latest_slfrf_year <- 2023
+cur_date_utc <- Sys.Date()
+cur_date <- sprintf(
+  "%s %d, %s",
+  format(cur_date_utc, "%B"),
+  as.integer(format(cur_date_utc, "%d")),
+  format(cur_date_utc, "%Y")
+)
+
+latest_slfrf_year <- 2025
 latest_slfrf_qtr <- "Q3"
 ```
 
 <center>**Last Updated:** `r cur_date`</center>
+<br>
+<center>**These data are preliminary and subject to revision.**</center>
 
 <br>
 
@@ -187,13 +197,10 @@ total_fed_updated_date <- "2022-08-26"
 
 
 data_all <- read_csv(
-  "https://urbanorg.box.com/shared/static/c603hjkqu017zntbmmh6tsxr61yawuu9.csv",
-  locale = locale(encoding = 'UTF-8')
-  ) %>%
+  "data/all_program_data - updated 3.2026 IR.csv",
+  locale = locale(encoding = "UTF-8")
+) %>%
   janitor::clean_names() %>%
-  # create variable to indicate if program is expired, 
-  # if expiration is NA, treat as not expired
-  # because this indicates available until expended
   mutate(
     expiration = if_else(
       expiration == "Available Until Expended",
@@ -201,37 +208,49 @@ data_all <- read_csv(
       mdy(expiration)
     ),
     across(
-      c(allocation, 
-        adopted_budget_per_treasury_report, 
-        total_cumulative_obligation, 
-        total_cumulative_expenditures, 
-        amount_exact),
-      ~ parse_number(.x)),
-    is_expired = if_else(expiration > cur_date, 0, 1),
+      c(
+        allocation,
+        adopted_budget_per_treasury_report,
+        total_cumulative_obligation,
+        total_cumulative_expenditures,
+        amount_exact
+      ),
+      ~ parse_number(as.character(.x))
+    ),
+    is_expired = if_else(expiration > Sys.Date(), 0, 1),
     is_expired = if_else(is.na(is_expired), 0, is_expired),
-    expiration = if_else(is.na(expiration),
+    expiration = if_else(
+      is.na(expiration),
       "Available Until Expended",
       as.character(expiration)
     ),
     current_as_of = mdy(current_as_of),
     new_topic = case_when(
-      new_topic == "All" ~"State/Local Discretionary Funding", 
+      new_topic == "All" ~ "State/Local Discretionary Funding",
       new_topic == "Household Investements" ~ "Household Investment",
-      T ~ new_topic),
-    new_subtopic = str_to_title(if_else(new_subtopic == "All", 
-                                    "State/Local Discretionary Funding", 
-                                    new_subtopic)),
-    source = if_else(!is.na(source), 
-                     str_glue('<a href = "{source_url}">{source}</a>'),
-                     NA_character_)) %>%
-  #filter out ARPA flexible funds because captured elsewhere
-  filter(!(legislation == "ARPA" & topic == "State/Local Discretionary Funding"),
-         !legislation == "IIJA", 
-         !is.na(new_topic)) %>%
-  #filter out FTA grants because go to transit agencies
+      TRUE ~ new_topic
+    ),
+    new_subtopic = str_to_title(
+      if_else(
+        new_subtopic == "All",
+        "State/Local Discretionary Funding",
+        new_subtopic
+      )
+    ),
+    source = if_else(
+      !is.na(source),
+      str_glue('<a href = "{source_url}">{source}</a>'),
+      NA_character_
+    )
+  ) %>%
+  filter(
+    !(legislation == "ARPA" & topic == "State/Local Discretionary Funding"),
+    legislation != "IIJA",
+    !is.na(new_topic)
+  ) %>%
   filter(program != "Federal Transit Administration (FTA) Grants") %>%
   select(-topic, -subtopic) %>%
-  rename("topic" = "new_topic", "subtopic" = "new_subtopic")
+  rename(topic = new_topic, subtopic = new_subtopic)
 
 # filter out Chicago General Obligation Bond to use in most dashboard elements
 data <- data_all %>%
@@ -309,9 +328,14 @@ il_unexp <- data_exp %>%
   pull(total_allocation)
 il_unexp_b <- round(il_unexp / 1000000000, 2)
 
-pct_il_unexp_b <- il_unexp_b / il_state_allocation_b
-pct_chicago_unexp_b <- chicago_unexp_b / chicago_allocation_b
-pct_cook_county_unexp_b <- cook_county_unexp_b / cook_county_allocation_b
+# Helper to convert empty to zero
+empty_to_zero <- function(x) {
+  if (length(x) == 0) 0 else x
+}
+
+pct_il_unexp_b <- empty_to_zero(il_unexp_b) / il_state_allocation_b
+pct_chicago_unexp_b <- empty_to_zero(chicago_unexp_b) / chicago_allocation_b
+pct_cook_county_unexp_b <- empty_to_zero(cook_county_unexp_b) / cook_county_allocation_b
 ```
 
 ```{r}
@@ -798,83 +822,121 @@ plot_expended_slfrf(arpa_slfrf_data, "Illinois")
 #   drop_na(topic) 
 # 
 
-ts_data_in <- readxl::read_excel(here("data", "arpa-spending-quarterly.xlsx")) %>%
-  clean_names() %>%
-  mutate(dashboard_project_name=str_to_title(dashboard_project_name),
-         project_name=str_to_title(project_name))
-
-ts_data <- ts_data_in %>%
-  #Fix misspelled dashboard topics
-  mutate(dashboard_topic = case_when(
-    dashboard_topic %in% c("Household Investements", "Household Investment") ~ "Household Investments",
-    TRUE ~ dashboard_topic)) %>%
-  filter(completion_status != "Cancelled",
-         funding_source == "ARPA SLFRF")  %>%
-  mutate(across(matches("total|expenditure|budget"), ~ as.numeric(.x))) %>%
-  arrange(dashboard_project_name, desc(report_period)) %>%
-  #Replace missing dashboard_project_name
-  mutate(dashboard_project_name = if_else(is.na(dashboard_project_name), project_name, dashboard_project_name)) %>%
-  #Drop rows where project name is still missing
-  filter(!is.na(dashboard_project_name))
-
-# Create a sorted list of unique report periods
-report_period_levels <- sort(unique(ts_data$report_period))
-
-# Convert report_period to an ordered factor with dynamic levels
-ts_data$report_period <- factor(ts_data$report_period, levels = report_period_levels, ordered = TRUE)
-
-# Create a complete data frame with all potential report periods for each project
-all_periods <- expand.grid(dashboard_project_name = unique(ts_data$dashboard_project_name), 
-                           report_period = factor(report_period_levels, levels = report_period_levels, ordered = TRUE)) %>%
-  arrange(dashboard_project_name, report_period) 
-
-# Merge with the original data to find missing periods
-ts_merged_data <- left_join(all_periods, ts_data, by = c("dashboard_project_name", "report_period"))
-
-# Function to fill in missing periods with the most recent available data
-fill_missing_periods <- function(df) {
-  df <- df %>%
-    arrange(report_period) %>%
-    fill(total_expenditures, geography, dashboard_topic, .direction = "down") %>%
-    filter(!is.na(total_expenditures))
-  return(df)
+# Helper for parsing dollar sign numbers
+parse_num_safe <- function(x) {
+  if (is.numeric(x)) {
+    x
+  } else {
+    readr::parse_number(as.character(x))
+  }
 }
 
-# Apply the function to each project
-ts_filled_data <- ts_merged_data %>%
-  group_by(dashboard_project_name) %>%
-  group_modify(~ fill_missing_periods(.x)) %>%
-  ungroup() %>%  
-  select(dashboard_project_name, geography, report_period, total_expenditures, dashboard_topic) %>%
-  group_by(dashboard_topic, geography, report_period) %>%
-  arrange(geography, dashboard_project_name, report_period) 
+ #Read in quarterly data from Excel file
+ts_data_in <- readxl::read_excel(
+  here::here("data", "CCT - Quarterly ARPA Spending up to Q3 2025.xlsx"),
+  sheet = "All"
+) %>%
+  janitor::clean_names() %>%
+  mutate(
+    dashboard_project_name = stringr::str_to_title(dashboard_project_name),
+    project_name = stringr::str_to_title(project_name)
+  )
+
+# Quarterly data cleanup
+ts_data <- ts_data_in %>%
+  mutate(
+    dashboard_topic = case_when(
+      dashboard_topic %in% c("Household Investements", "Household Investment") ~ "Household Investments",
+      TRUE ~ dashboard_topic
+    ),
+    dashboard_project_name = na_if(trimws(dashboard_project_name), ""),
+    project_name = na_if(trimws(project_name), "")
+  ) %>%
+  filter(
+    trimws(completion_status) != "Cancelled",
+    trimws(funding_source) == "ARPA SLFRF"
+  ) %>%
+  mutate(
+    across(
+      c(adopted_budget, total_obligations, total_expenditures, percent_of_expended_budgeted_funds),
+      ~ readr::parse_number(as.character(.x))
+    ),
+    dashboard_project_name = coalesce(dashboard_project_name, project_name)
+  ) %>%
+  filter(!is.na(dashboard_project_name)) %>%
+  arrange(dashboard_project_name, desc(report_period))
+
+# Check for duplicate project_id/report_period combinations
+dup_keys <- ts_data %>%
+  count(project_id, report_period) %>%
+  filter(n > 1)
+
+if (nrow(dup_keys) > 0) {
+  stop("Duplicate project_id/report_period combinations found in ts_data. Please correct before continuing")
+}
+
+# Create sorted report period levels
+report_period_levels <- sort(unique(ts_data$report_period))
+
+ts_filled_data <- ts_data %>%
+  select(
+    project_id,
+    dashboard_project_name,
+    geography,
+    dashboard_topic,
+    report_period,
+    total_expenditures
+  ) %>%
+  mutate(
+    report_period = factor(report_period, levels = report_period_levels, ordered = TRUE)
+  ) %>%
+  group_by(project_id) %>%
+  tidyr::complete(
+    report_period = factor(report_period_levels, levels = report_period_levels, ordered = TRUE)
+  ) %>%
+  arrange(report_period, .by_group = TRUE) %>%
+  tidyr::fill(
+    dashboard_project_name,
+    geography,
+    dashboard_topic,
+    total_expenditures,
+    .direction = "down"
+  ) %>%
+  filter(!is.na(total_expenditures)) %>%
+  ungroup() %>%
+  arrange(project_id, report_period)
 
 ts_filled_summary <- ts_filled_data %>%
-  summarize(total_expenditures = sum(total_expenditures, na.rm = TRUE), .groups = 'drop') %>%
+  group_by(dashboard_topic, geography, report_period) %>%
+  summarise(total_expenditures = sum(total_expenditures, na.rm = TRUE), .groups = "drop") %>%
   arrange(geography, dashboard_topic, report_period)
   
-
-dashboard_topic_budgets <- ts_data_in %>%
-  mutate(dashboard_topic = case_when(
-    dashboard_topic %in% c("Household Investements", "Household Investment") ~ "Household Investments",
-    TRUE ~ dashboard_topic)) %>%
-  filter(completion_status != "Cancelled",
-         funding_source == "ARPA SLFRF")  %>%
-  mutate(across(matches("total|expenditure|budget"), ~ as.numeric(.x))) %>%
-  group_by(dashboard_project_name) %>%
-  slice_max(report_period, n = 1, with_ties = FALSE) %>%
+dashboard_topic_budgets <- ts_data %>%
+  group_by(project_id) %>%
+  arrange(report_period, .by_group = TRUE) %>%
+  tidyr::fill(adopted_budget, geography, dashboard_topic, dashboard_project_name, .direction = "down") %>%
+  slice_tail(n = 1) %>%
   ungroup() %>%
-  select(dashboard_project_name, geography, adopted_budget, dashboard_topic) %>%
+  select(project_id, dashboard_project_name, geography, adopted_budget, dashboard_topic) %>%
+  filter(!is.na(dashboard_topic), !is.na(geography)) %>%
   group_by(dashboard_topic, geography) %>%
-  summarise(total_adopted_budget = sum(adopted_budget, na.rm = TRUE)) %>%
-  drop_na(dashboard_topic) %>%
+  summarise(
+    total_adopted_budget = sum(adopted_budget, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
   arrange(dashboard_topic, geography)
 
-
-data_ts <- left_join(ts_filled_summary, dashboard_topic_budgets, by = c("dashboard_topic", "geography")) %>%
+data_ts <- ts_filled_summary %>%
+  left_join(dashboard_topic_budgets, by = c("dashboard_topic", "geography")) %>%
   rename(topic = dashboard_topic) %>%
-  mutate(date = as.yearqtr(report_period, format = "%Y-Q%q")) %>%
-  mutate(pct_expended_budget = total_expenditures / total_adopted_budget)
+  mutate(
+    date = zoo::as.yearqtr(as.character(report_period), format = "%Y-Q%q"),
+    pct_expended_budget = dplyr::if_else(
+      !is.na(total_adopted_budget) & total_adopted_budget != 0,
+      total_expenditures / total_adopted_budget,
+      NA_real_
+    )
+  )
 
 # Define custom color palette
 custom_colors <- c("#47c3d3", "#C1D82F", "#6C5893", "#000000", "#387ECF", "#FDBB30")

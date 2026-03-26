@@ -879,16 +879,16 @@ if (nrow(dup_keys) > 0) {
 report_period_levels <- sort(unique(ts_data$report_period))
 
 ts_filled_data <- ts_data %>%
-  mutate(
-    report_period = factor(report_period, levels = report_period_levels, ordered = TRUE)
-  ) %>%
   select(
     project_id,
     dashboard_project_name,
     geography,
+    dashboard_topic,
     report_period,
-    total_expenditures,
-    dashboard_topic
+    total_expenditures
+  ) %>%
+  mutate(
+    report_period = factor(report_period, levels = report_period_levels, ordered = TRUE)
   ) %>%
   group_by(project_id) %>%
   tidyr::complete(
@@ -904,7 +904,7 @@ ts_filled_data <- ts_data %>%
   ) %>%
   filter(!is.na(total_expenditures)) %>%
   ungroup() %>%
-  arrange(geography, dashboard_project_name, report_period)
+  arrange(project_id, report_period)
 
 ts_filled_summary <- ts_filled_data %>%
   group_by(dashboard_topic, geography, report_period) %>%

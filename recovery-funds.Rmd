@@ -790,7 +790,7 @@ plot_expended_slfrf(arpa_slfrf_data, "Cook County")
 ```{r, fig.width = 10, fig.height = 6}
 plot_expended_slfrf(arpa_slfrf_data, "Illinois")
 ```
-</div>
+
 Adopted budget figures are sourced from Department of Treasury quarterly ARPA SLFRF reports. As of 2025, Treasury reports no longer feature an “Adopted Budget” column. Our data reflects adopted budgets as of Q4-2024.
 
 <br> <br>
@@ -798,32 +798,6 @@ Adopted budget figures are sourced from Department of Treasury quarterly ARPA SL
 ## Spending by Quarter {.tabset .tabset-pills}
 
 ```{r read-quarterly-data}
-# Read and prepare the data
-# data_ts <- readxl::read_excel(here("data", "arpa-spending-quarterly.xlsx")) %>%
-#   clean_names() %>%
-#   mutate(dashboard_topic = if_else(dashboard_topic == "Household Investements", "Household Investment", dashboard_topic)) %>%
-#   mutate(across(matches("total|expenditure|budget"), ~ as.numeric(.x))) %>%
-#   filter(completion_status != "Cancelled") %>%
-#   select(
-#     date = report_period, geography, agency,
-#     topic = dashboard_topic,
-#     subtopic = dashboard_subtopic, adopted_budget, matches("total"), matches("percent"),
-#     matches("expenditure")
-#   ) %>%
-#   mutate(date = as.yearqtr(date, format = "%Y-Q%q")) %>%
-#   summarise(
-#     across(
-#       c(total_obligations, total_expenditures, adopted_budget),
-#       ~ sum(.x, na.rm = TRUE)
-#     ),
-#     .by = c("geography", "date", "topic")
-#   ) %>%
-#   mutate(
-#     pct_expended_budget = total_expenditures / adopted_budget,
-#     pct_expended_obligations = total_expenditures / total_obligations
-#   ) %>%
-#   drop_na(topic) 
-# 
 
 # Helper for parsing dollar sign numbers
 parse_num_safe <- function(x) {
@@ -1014,6 +988,7 @@ for (geo in unique(nested_data$geography)) {
   print(nested_data$ts_plots[[which(nested_data$geography == geo)]])
 }
 ```
+</div>
 
 In some cases, expenditure data from Department of Treasury quarterly ARPA SLFRF reports show a decrease in expenses between quarters for specific programs. This may be a reporting or clerical error, or may reflect funds that jurisdictions redistributed to other programs.
 

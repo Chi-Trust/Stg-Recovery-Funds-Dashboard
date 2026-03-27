@@ -190,6 +190,8 @@ plot_funds_by_var <- function(data, fill_var, lab_text) {
 }
 ```
 
+<br>
+
 # Total Dollars Tracked {.tabset .tabset-pills}
 
 ## By Legislation

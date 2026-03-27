@@ -57,7 +57,7 @@ librarian::shelf(
 options(scipen = 999)
 
 # Urban theme settings
-set_urbn_defaults(style = "print", base_size = 12)
+set_urbn_defaults(style = "print", base_size = 12, base_family = "Merriweather")
 
 # Load Merriweather font
 #uname <- "RPitingo"
@@ -81,6 +81,13 @@ font_import(
   pattern = "Merriweather",
   prompt = FALSE
 )
+loadfonts(device = "all", quiet = TRUE)
+
+# Use showtext to reliably render Merriweather in static (PNG) plots
+library(showtext)
+font_add_google("Merriweather", "Merriweather")
+showtext_auto()
+showtext_opts(dpi = 192)
 
 palette <- pal_palette(
   cct = c(

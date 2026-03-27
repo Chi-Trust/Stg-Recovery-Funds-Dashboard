@@ -97,7 +97,7 @@ library(zip)
 library(leaflet)
 library(scales)
 
-set_urbn_defaults(style = "print", base_size = 12)
+set_urbn_defaults(style = "print", base_size = 12, base_family = "Merriweather")
 #set_urbn_defaults(style = "print")
 
 # Load Merriweather font
@@ -122,8 +122,15 @@ font_import(
   pattern = "Merriweather",
   prompt = FALSE
 )
+loadfonts(device = "all", quiet = TRUE)
 
-# set current fiscal year 
+# Use showtext to reliably render Merriweather in static (PNG) plots
+library(showtext)
+font_add_google("Merriweather", "Merriweather")
+showtext_auto()
+showtext_opts(dpi = 192)
+
+# set current fiscal year
 cur_date <- Sys.Date()
 cur_fiscal_year <- if_else(
   month(cur_date) > 9, 

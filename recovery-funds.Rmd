@@ -989,14 +989,18 @@ xaringanExtra::use_panelset()
 
 <div class="tabset">
 <!-- Tab for each geography -->
+```{r quarterly-spending-footnote}
+quarterly_spending_footnote <- "In some cases, expenditure data from Department of Treasury quarterly ARPA SLFRF reports show a decrease in expenses between quarters for specific programs. This may be a reporting or clerical error, or may reflect funds that jurisdictions redistributed to other programs."
+```
+
 ```{r qtr_loop, echo=FALSE, results='asis', fig.width=10, fig.height=6}
 for (geo in unique(nested_data$geography)) {
   cat('\n\n### ', geo, '\n')
   print(nested_data$ts_plots[[which(nested_data$geography == geo)]])
+  cat('\n\n', quarterly_spending_footnote, '\n')
 }
 ```
 </div>
-In some cases, expenditure data from Department of Treasury quarterly ARPA SLFRF reports show a decrease in expenses between quarters for specific programs. This may be a reporting or clerical error, or may reflect funds that jurisdictions redistributed to other programs.
 
 <br> <br>
 

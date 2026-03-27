@@ -790,6 +790,7 @@ plot_expended_slfrf(arpa_slfrf_data, "Cook County")
 ```{r, fig.width = 10, fig.height = 6}
 plot_expended_slfrf(arpa_slfrf_data, "Illinois")
 ```
+</div>
 Adopted budget figures are sourced from Department of Treasury quarterly ARPA SLFRF reports. As of 2025, Treasury reports no longer feature an “Adopted Budget” column. Our data reflects adopted budgets as of Q4-2024.
 
 <br> <br>
@@ -1013,10 +1014,10 @@ for (geo in unique(nested_data$geography)) {
   print(nested_data$ts_plots[[which(nested_data$geography == geo)]])
 }
 ```
+
 In some cases, expenditure data from Department of Treasury quarterly ARPA SLFRF reports show a decrease in expenses between quarters for specific programs. This may be a reporting or clerical error, or may reflect funds that jurisdictions redistributed to other programs.
 
-</div>
-
+<br> <br>
 
 # Explore Funding by Policy Area {.tabset .tabset-dropdown}
 

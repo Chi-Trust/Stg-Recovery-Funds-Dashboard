@@ -15,7 +15,13 @@ output:
 # Glossary
 
 ```{r, echo = FALSE}
-cur_date <- Sys.Date()
+cur_date_utc <- Sys.Date()
+cur_date <- sprintf(
+  "%s %d, %s",
+  format(cur_date_utc, "%B"),
+  as.integer(format(cur_date_utc, "%d")),
+  format(cur_date_utc, "%Y")
+)
 ```
 
 <center>**Last Updated:** `r cur_date`</center>

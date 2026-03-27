@@ -12,7 +12,9 @@ output:
 ```
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Merriweather" />
 
+<center>
 # Glossary
+</center>
 
 ```{r, echo = FALSE}
 cur_date_utc <- Sys.Date()

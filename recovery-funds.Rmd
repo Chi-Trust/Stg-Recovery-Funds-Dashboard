@@ -727,6 +727,10 @@ Negative values indicate that local governments' total adopted budgets for the g
 
 ## Adopted Funds Spent by Topic {.tabset .tabset-pills}
 
+```{r adopted-budget-footnote}
+adopted_budget_footnote <- 'Adopted budget figures are sourced from Department of Treasury quarterly ARPA SLFRF reports. As of 2025, Treasury reports no longer feature an "Adopted Budget" column. Our data reflects adopted budgets as of Q4-2024.'
+```
+
 ```{r, pct-slfrf-expended}
 
 plot_expended_slfrf <- function(.data, geography) {
@@ -776,6 +780,8 @@ plot_expended_slfrf <- function(.data, geography) {
 ```{r, fig.width = 10, fig.height = 6}
 plot_expended_slfrf(arpa_slfrf_data, "Chicago")
 ```
+`r adopted_budget_footnote`
+
 <br> <br>
 
 ### Cook County
@@ -783,6 +789,8 @@ plot_expended_slfrf(arpa_slfrf_data, "Chicago")
 ```{r, fig.width = 10, fig.height = 6}
 plot_expended_slfrf(arpa_slfrf_data, "Cook County")
 ```
+`r adopted_budget_footnote`
+
 <br> <br>
 
 ### Illinois
@@ -790,8 +798,7 @@ plot_expended_slfrf(arpa_slfrf_data, "Cook County")
 ```{r, fig.width = 10, fig.height = 6}
 plot_expended_slfrf(arpa_slfrf_data, "Illinois")
 ```
-
-Adopted budget figures are sourced from Department of Treasury quarterly ARPA SLFRF reports. As of 2025, Treasury reports no longer feature an “Adopted Budget” column. Our data reflects adopted budgets as of Q4-2024.
+`r adopted_budget_footnote`
 
 <br> <br>
 
@@ -989,7 +996,6 @@ for (geo in unique(nested_data$geography)) {
 }
 ```
 </div>
-
 In some cases, expenditure data from Department of Treasury quarterly ARPA SLFRF reports show a decrease in expenses between quarters for specific programs. This may be a reporting or clerical error, or may reflect funds that jurisdictions redistributed to other programs.
 
 <br> <br>

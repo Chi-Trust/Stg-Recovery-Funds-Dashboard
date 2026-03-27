@@ -63,6 +63,8 @@ knitr::include_graphics(here::here("www", "images", "Funding Flows Charts_inf.pn
 
 For more information, see our [Frequently Asked Questions](./FAQ.html) and [Glossary](./glossary.html).
 
+<br>
+
 ```{r setup}
 #| echo: false
 #| include: false
@@ -459,11 +461,12 @@ plot_funds_by_geo_var_obs <- function(data, fill_var){
                                debug = FALSE))
    
    plt <- ggplotly(allocations_by_recipient_var, tooltip = "text") %>%
-     layout(autosize = F, 
-            width = 865, 
-            h = 500, 
+     layout(autosize = F,
+            width = 865,
+            h = 500,
+            font = list(family = "Merriweather"),
             margin = list(
-              l = 120, 
+              l = 120,
               r = 100,
               t = 50,
               b = 120
@@ -472,7 +475,7 @@ plot_funds_by_geo_var_obs <- function(data, fill_var){
               x = 0,
               y = -0.4,
               text = funding_sentence,
-              showarrow = F, xref='paper', yref='paper', 
+              showarrow = F, xref='paper', yref='paper',
       font=list(size=12)),
       xaxis = list(title = list(font = list(size = 14)), tickfont = list(size = 12)),
       yaxis = list(title = list(font = list(size = 14)), tickfont = list(size = 12)),

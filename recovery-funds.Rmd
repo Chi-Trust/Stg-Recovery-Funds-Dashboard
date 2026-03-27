@@ -586,7 +586,7 @@ xaringanExtra::use_panelset()
 ```
 
 
-## Difference Between 2021 Allocations and 2023 Adopted Budgets
+## Difference Between 2021 Allocations and 2024 Adopted Budgets
 
 ```{r c6}
 budget_gap <-
@@ -782,7 +782,7 @@ plot_expended_slfrf(arpa_slfrf_data, "Chicago")
 ```
 `r adopted_budget_footnote`
 
-<br> <br>
+<br>
 
 ### Cook County
 
@@ -791,7 +791,7 @@ plot_expended_slfrf(arpa_slfrf_data, "Cook County")
 ```
 `r adopted_budget_footnote`
 
-<br> <br>
+<br>
 
 ### Illinois
 
@@ -800,7 +800,7 @@ plot_expended_slfrf(arpa_slfrf_data, "Illinois")
 ```
 `r adopted_budget_footnote`
 
-<br> <br>
+<br>
 
 ## Spending by Quarter {.tabset .tabset-pills}
 
@@ -1002,7 +1002,7 @@ for (geo in unique(nested_data$geography)) {
 ```
 </div>
 
-<br> <br>
+<br>
 
 # Explore Funding by Policy Area {.tabset .tabset-dropdown}
 
